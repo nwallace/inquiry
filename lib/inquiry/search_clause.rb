@@ -27,12 +27,15 @@ module Inquiry
 
     attr_reader :search_key, :filter_clause, :options
 
+    def interpolation_strategy
+      @interpolation_strategy ||= (
+        type = options.fetch(:type, :exact)
+        Inquiry::InterpolationStrategies.const_get(type.to_s.classify)
+      )
+    end
+
     def match_values(clause, match_value)
-      final_match_value = if options[:fuzzy]
-                            "%#{match_value}%"
-                          else
-                            match_value
-                          end
+      final_match_value = interpolation_strategy.match_value(match_value)
       Array.new(clause.count("?"), final_match_value)
     end
   end
