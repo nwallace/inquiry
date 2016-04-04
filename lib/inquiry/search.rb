@@ -9,6 +9,14 @@ module Inquiry
         sort_orders << SortClause.new(sort_key, sort_clause, options)
       end
 
+      def model_class(model_class)
+        @model_class = model_class
+      end
+
+      def base_scope
+        (@model_class || self.name.to_s.sub(/Search$/, "").constantize).all
+      end
+
       def search(search_parameters={})
         (search_clauses + sort_orders).inject(base_scope) do |scope, query_clause|
           query_clause.apply(scope, search_parameters)
