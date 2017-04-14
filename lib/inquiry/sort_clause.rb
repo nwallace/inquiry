@@ -1,5 +1,6 @@
 module Inquiry
   class SortClause
+    attr_reader :sort_key
     def initialize(sort_key, sort_clause, options={})
       @sort_key = sort_key
       @sort_clause = sort_clause
@@ -23,6 +24,6 @@ module Inquiry
 
     protected
 
-    attr_reader :sort_key, :sort_clause, :options
+    attr_reader :sort_clause, :options
   end
 end

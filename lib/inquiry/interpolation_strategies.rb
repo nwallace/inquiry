@@ -2,7 +2,7 @@ module Inquiry
   module InterpolationStrategies
     {
       "Exact" => ->(value) { value },
-      "Fuzzy" => ->(value) { "%#{value}%" },
+      "Partial" => ->(value) { "%#{value}%" },
       "Prefix" => ->(value) { "#{value}%" },
       "Suffix" => ->(value) { "%#{value}" },
     }.each do |type, interpolation_strategy|

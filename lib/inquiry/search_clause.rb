@@ -1,5 +1,8 @@
 module Inquiry
   class SearchClause
+
+    attr_reader :search_key, :filter_clause, :options
+
     def initialize(search_key, filter_clause, options={})
       @search_key = search_key
       @filter_clause = filter_clause
@@ -24,8 +27,6 @@ module Inquiry
     end
 
     protected
-
-    attr_reader :search_key, :filter_clause, :options
 
     def interpolation_strategy
       @interpolation_strategy ||= (

@@ -5,7 +5,7 @@ RSpec.describe Inquiry::SearchClause do
   describe "initialization" do
     it "takes the search key, filter clause, and optional options" do
       expect(described_class.new(:created_after, "created_at > ?")).to be_a described_class
-      expect(described_class.new(:first_name, "first_name LIKE ?", type: :fuzzy)).to be_a described_class
+      expect(described_class.new(:first_name, "first_name LIKE ?", type: :partial)).to be_a described_class
     end
   end
 
@@ -22,14 +22,14 @@ RSpec.describe Inquiry::SearchClause do
       expect(subject.apply(original_scope, {})).to eq original_scope
     end
 
-    it "does a fuzzy match when configured to do so" do
-      subject = described_class.new(:first_name, "first_name LIKE ?", type: :fuzzy)
+    it "does a partial match when configured to do so" do
+      subject = described_class.new(:first_name, "first_name LIKE ?", type: :partial)
       expect(subject.apply(Order.all, first_name: "J").to_sql)
         .to eq Order.where("first_name LIKE ?", "%J%").to_sql
     end
 
     it "applies the search match value as many times as it is referenced" do
-      subject = described_class.new(:name, "first_name LIKE ? OR last_name LIKE ?", type: :fuzzy)
+      subject = described_class.new(:name, "first_name LIKE ? OR last_name LIKE ?", type: :partial)
       expect(subject.apply(Order.all, name: "J").to_sql)
         .to eq Order.where("first_name LIKE ? OR last_name LIKE ?", "%J%", "%J%").to_sql
     end
