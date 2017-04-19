@@ -10,7 +10,8 @@ module Inquiry
     end
 
     def apply(scope, search_parameters)
-      if match_value=search_parameters[search_key]
+      if search_parameters.has_key?(search_key) && !search_parameters[search_key].nil?
+        match_value = search_parameters[search_key]
         if relation_to_join=options[:joins]
           scope = scope.joins(relation_to_join)
         end

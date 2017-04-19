@@ -7,7 +7,7 @@ RSpec.describe Inquiry::Search do
     let(:fanny) { Customer.create!(first_name: "Fanny", last_name: "Billings") }
     let(:brent) { Customer.create!(first_name: "Brent", last_name: "Frank") }
     let(:ray_gun) { Product.create!(name: "Ray Gun") }
-    let(:evil_lair) { Product.create!(name: "Evil Lair") }
+    let(:evil_lair) { Product.create!(name: "Evil Lair", discontinued: true) }
     let(:fabric) { Product.create!(name: "Fabric") }
     let(:thimble) { Product.create!(name: "Thimble") }
     let!(:brent_order) { Order.create!(customer: brent, created_at: date + 1.day,
@@ -46,6 +46,12 @@ RSpec.describe Inquiry::Search do
       expect {
         OrderSearch.search(sort_order: :unknown)
       }.to raise_error described_class::InvalidSortOrderError
+    end
+
+    it "treats falsey values meaningfully" do
+      expect(ProductSearch.search(discontinued: true)).to match_array [evil_lair]
+      expect(ProductSearch.search(discontinued: false)).to match_array [ray_gun, fabric, thimble]
+      expect(ProductSearch.search(discontinued: nil)).to match_array [evil_lair, ray_gun, fabric, thimble]
     end
   end
 end
