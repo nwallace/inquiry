@@ -11,7 +11,12 @@ RSpec.describe Inquiry::Formatters::DateTime do
     let(:view) { double("the view") }
     let(:brent) { Customer.create!(first_name: "Brent", created_at: DateTime.new(2010, 2, 24, 8, 30, 12)) }
 
-    it "formats the field's value according to the specified format" do
+    it "formats the field's value according to the default format when no format is specified" do
+      subject = described_class.new(:created_at)
+      expect(subject.call(view, brent)).to eq "2010-02-24T08:30:12+00:00"
+    end
+
+    it "formats the field's value according to the specified format when a format is given" do
       subject = described_class.new(:created_at, :db)
       expect(subject.call(view, brent)).to eq "2010-02-24 08:30:12"
 
