@@ -84,7 +84,11 @@ RSpec.describe Inquiry::Report do
       expect(filtered.map(&:record)).to match_array [brent_order]
     end
 
-    it "returns only the first page of results when paginating" # ? could be an initialization argument
+    it "returns only the first page of results when paginating" do
+      subject = OrderReport.new(per_page: 1)
+      expect(subject.rows.count).to eq 1
+      expect(subject.results.total_entries).to eq 2
+    end
 
     it "returns rows in the report's default order when order is not specified" do
       expect(OrderReport.new.rows.map(&:record)).to eq [fanny_order, brent_order]
@@ -92,6 +96,32 @@ RSpec.describe Inquiry::Report do
 
     it "returns rows in the specified order when order is specified" do
       expect(OrderReport.new(sort_order: :customer_name).rows.map(&:record)).to eq [fanny_order, brent_order]
+    end
+
+  describe "#results" do
+    let!(:brent_order_2) { Order.create!(customer: brent, line_items: [
+      LineItem.create!(product: fabric, price: 15)]) }
+    let!(:brent_order_3) { Order.create!(customer: brent, line_items: [
+      LineItem.create!(product: fabric, price: 15)]) }
+    let!(:fanny_order_2) { Order.create!(customer: fanny, line_items: [
+      LineItem.create!(product: fabric, price: 15)]) }
+    let!(:fanny_order_3) { Order.create!(customer: fanny, line_items: [
+      LineItem.create!(product: fabric, price: 15)]) }
+
+    it "returns the search query scope paginated with WillPaginate" do
+      results = OrderReport.new.results
+      expect(results.total_entries).to eq 6
+      expect(results.to_a.count).to eq 6
+      expect(results.current_page).to eq 1
+      expect(results.total_pages).to eq 1
+    end
+
+    it "incorporates pagination options from initialization" do
+      results = OrderReport.new(per_page: 2, page: 2).results
+      expect(results.total_entries).to eq 6
+      expect(results.to_a.count).to eq 2
+      expect(results.current_page).to eq 2
+      expect(results.total_pages).to eq 3
     end
   end
 

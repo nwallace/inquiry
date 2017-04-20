@@ -71,6 +71,10 @@ module Inquiry
 
     def initialize(criteria={})
       if !criteria.nil?
+        @pagination_options = {
+          page: criteria.delete(:page) || 1,
+          per_page: criteria.delete(:per_page),
+        }
         safe_criteria = criteria.select {|k,v| default_criteria.has_key?(k)}
         @criteria = default_criteria.merge(safe_criteria)
         @columns = if selected_column_keys=criteria[:columns]
@@ -96,14 +100,20 @@ module Inquiry
       )
     end
 
+    def results
+      @results ||= search_class.search(criteria).paginate(@pagination_options)
+    end
+
     private
 
     def default_criteria
-      search_class.search_clauses.map(&:search_key).zip([]).to_h.tap do |h|
-        if default_sort_order
-          h[:sort_order] = default_sort_order
+      @default_criteria ||= (
+        search_class.search_clauses.map(&:search_key).zip([]).to_h.tap do |h|
+          if default_sort_order
+            h[:sort_order] = default_sort_order
+          end
         end
-      end
+      )
     end
 
     def default_columns
@@ -120,10 +130,6 @@ module Inquiry
 
     def search_class
       self.class.instance_variable_get("@search_class")
-    end
-
-    def search_results
-      @search_results ||= search_class.search(criteria)
     end
   end
 end
