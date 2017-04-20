@@ -23,6 +23,8 @@ module Inquiry
         sort_order = search_parameters[:sort_order]
         if sort_order && sort_orders.none? {|o| o.sort_key == sort_order.to_sym}
           raise InvalidSortOrderError, "This sort order is not defined on #{self.name}: #{sort_order.inspect}"
+        elsif sort_order
+          search_parameters[:sort_order] = sort_order.to_sym
         end
         (search_clauses + sort_orders).inject(base_scope) do |scope, query_clause|
           query_clause.apply(scope, search_parameters)

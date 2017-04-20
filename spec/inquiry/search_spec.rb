@@ -35,7 +35,7 @@ RSpec.describe Inquiry::Search do
     it "sorts by the specified sort order", :aggregate_failures do
       expect(OrderSearch.search(sort_order: :id)).to eq [brent_order, fanny_order]
       expect(OrderSearch.search(sort_order: :highest_price)).to eq [fanny_order, brent_order]
-      expect(OrderSearch.search(sort_order: :customer_name)).to eq [fanny_order, brent_order]
+      expect(OrderSearch.search(sort_order: "customer_name")).to eq [fanny_order, brent_order]
     end
 
     it "sorts by the default sort order, if one is configured and none is specified" do

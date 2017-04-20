@@ -52,6 +52,10 @@ module Inquiry
         @default_sort_order = sort_order
       end
 
+      def permitted_criteria
+        @search_class.search_clauses.map(&:search_key) << :sort_order
+      end
+
       protected
 
       def columns
@@ -66,22 +70,30 @@ module Inquiry
     attr_reader :criteria, :columns
 
     def initialize(criteria={})
-      permitted_criteria = criteria.select {|k,v| default_criteria.has_key?(k)}
-      @criteria = default_criteria.merge(permitted_criteria)
-      @columns = if selected_column_keys=criteria[:columns]
-                   selected_column_keys.map!(&:to_sym)
-                   all_columns.values_at(*selected_column_keys).tap do |cols|
-                     if cols.any?(&:nil?)
-                       raise InvalidColumnError, "These columns not undefined on #{self.class.name}: #{selected_column_keys.reject{|k| all_columns.has_key?(k)}.join(", ")}"
+      if !criteria.nil?
+        safe_criteria = criteria.select {|k,v| default_criteria.has_key?(k)}
+        @criteria = default_criteria.merge(safe_criteria)
+        @columns = if selected_column_keys=criteria[:columns]
+                     selected_column_keys.map!(&:to_sym)
+                     all_columns.values_at(*selected_column_keys).tap do |cols|
+                       if cols.any?(&:nil?)
+                         raise InvalidColumnError, "These columns not undefined on #{self.class.name}: #{selected_column_keys.reject{|k| all_columns.has_key?(k)}.join(", ")}"
+                       end
                      end
+                   else
+                     default_columns
                    end
-                 else
-                   default_columns
-                 end
+      end
     end
 
     def rows
-      @rows ||= search_results.map {|record| Row.new(record, @columns)}
+      @rows ||= (
+        if @columns.nil?
+          []
+        else
+          results.map {|record| Row.new(record, @columns)}
+        end
+      )
     end
 
     private
