@@ -104,8 +104,6 @@ module Inquiry
       @results ||= search_class.search(criteria).paginate(@pagination_options)
     end
 
-    private
-
     def default_criteria
       @default_criteria ||= (
         search_class.search_clauses.map(&:search_key).zip([]).to_h.tap do |h|
@@ -115,6 +113,8 @@ module Inquiry
         end
       )
     end
+
+    private
 
     def default_columns
       all_columns.values.select(&:default?)
