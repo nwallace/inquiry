@@ -71,10 +71,12 @@ module Inquiry
 
     def initialize(criteria={})
       if !criteria.nil?
-        @pagination_options = {
-          page: criteria.delete(:page) || 1,
-          per_page: criteria.delete(:per_page),
-        }
+        @pagination_options = if criteria.fetch(:paginate, true)
+                                {
+                                  page: criteria.delete(:page) || 1,
+                                  per_page: criteria.delete(:per_page),
+                                }
+                              end
         safe_criteria = criteria.select {|k,v| default_criteria.has_key?(k)}
         @criteria = default_criteria.merge(safe_criteria)
         @columns = if selected_column_keys=criteria[:columns]
@@ -101,7 +103,14 @@ module Inquiry
     end
 
     def results
-      @results ||= search_class.search(criteria).paginate(@pagination_options)
+      @results ||= (
+        base_scope = search_class.search(criteria)
+        if @pagination_options
+          base_scope.paginate(@pagination_options)
+        else
+          base_scope
+        end
+      )
     end
 
     def default_criteria
@@ -114,11 +123,11 @@ module Inquiry
       )
     end
 
-    private
-
     def default_columns
       all_columns.values.select(&:default?)
     end
+
+    private
 
     def default_sort_order
       self.class.instance_variable_get("@default_sort_order")

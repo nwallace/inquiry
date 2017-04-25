@@ -90,6 +90,16 @@ RSpec.describe Inquiry::Report do
       expect(subject.results.total_entries).to eq 2
     end
 
+    it "returns all results when not paginating" do
+      30.times do |i|
+        Order.create!(customer: brent, created_at: date - i.days,
+                      line_items: [LineItem.create!(product: fabric, price: 2*i)])
+      end
+      subject = OrderReport.new(paginate: false)
+      expect(subject.rows.count).to eq 32
+      expect(subject.results.to_a.count).to eq 32
+    end
+
     it "returns rows in the report's default order when order is not specified" do
       expect(OrderReport.new.rows.map(&:record)).to eq [fanny_order, brent_order]
     end
@@ -122,6 +132,30 @@ RSpec.describe Inquiry::Report do
       expect(results.to_a.count).to eq 2
       expect(results.current_page).to eq 2
       expect(results.total_pages).to eq 3
+    end
+  end
+
+  describe "#default_criteria" do
+    it "returns the default search criteria of the search class" do
+      expected_criteria = {
+       created_after: nil,
+       customer_name: nil,
+       includes_product: nil,
+       last_name_starts_with: nil,
+       minimum_price: nil,
+       sort_order: :highest_price,
+       status: nil,
+      }
+      expect(OrderReport.new.default_criteria).to eq(expected_criteria)
+      expect(OrderReport.new(created_after: 2.days.ago, sort_order: :id).default_criteria).to eq(expected_criteria)
+    end
+  end
+
+  describe "#default_columns" do
+    it "returns the default columns of the search class" do
+      expected_columns = [:id, :status, :customer, :total_price]
+      expect(OrderReport.new.default_columns.map(&:key)).to eq(expected_columns)
+      expect(OrderReport.new(columns: [:id, :created_at]).default_columns.map(&:key)).to eq(expected_columns)
     end
   end
 
