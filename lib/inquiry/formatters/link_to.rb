@@ -15,9 +15,13 @@ module Inquiry
                     elsif @label || @label_method
                       [@label || linked_record.public_send(@label_method), linked_record]
                     else
-                      linked_record
+                      [linked_record]
                     end
-        view.link_to *link_args
+        if view.try(:formats) && (view.formats & [:csv]).any?
+          link_args.first
+        else
+          view.link_to *link_args
+        end
       end
     end
   end
