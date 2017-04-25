@@ -108,6 +108,17 @@ RSpec.describe Inquiry::Report do
       expect(OrderReport.new(sort_order: :customer_name).rows.map(&:record)).to eq [fanny_order, brent_order]
     end
 
+    it "includes any associated records that a column specifies to include" do
+      30.times do |i|
+        Order.create!(customer: brent, created_at: date - i.days,
+                      line_items: [LineItem.create!(product: fabric, price: 2*i)])
+      end
+      view = double("the view").as_null_object
+      subject = OrderReport.new(columns: [:customer, :total_price])
+      expect { subject.rows.map(&:values).flatten.each {|v| v.render(view)} }.not_to exceed_query_limit(3)
+    end
+  end
+
   describe "#results" do
     let!(:brent_order_2) { Order.create!(customer: brent, line_items: [
       LineItem.create!(product: fabric, price: 15)]) }

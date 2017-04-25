@@ -3,12 +3,13 @@ module Inquiry
     InvalidColumnError = Class.new(StandardError)
 
     class Column
-      attr_reader :key, :title, :formatter
+      attr_reader :key, :title, :formatter, :includes_values
       def initialize(key, options)
         @key = key
         @default = !!options[:default]
         @title = options[:title] || key.to_s.titleize
         @formatter = options[:formatter] || Inquiry::Formatters::Simple.new(key)
+        @includes_values = options[:includes]
       end
       def default?
         @default
@@ -97,7 +98,7 @@ module Inquiry
         if @columns.nil?
           []
         else
-          results.map {|record| Row.new(record, @columns)}
+          results_scope_with_includes.map {|record| Row.new(record, @columns)}
         end
       )
     end
@@ -139,6 +140,15 @@ module Inquiry
 
     def search_class
       self.class.instance_variable_get("@search_class")
+    end
+
+    def results_scope_with_includes
+      includes_values = (@columns || []).map(&:includes_values).reject(&:blank?)
+      if includes_values.any?
+        results.includes(*includes_values)
+      else
+        results
+      end
     end
   end
 end
