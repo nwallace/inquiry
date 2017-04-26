@@ -170,6 +170,13 @@ RSpec.describe Inquiry::Report do
     end
   end
 
+  describe "#sort_orders" do
+    it "delegates to the search class" do
+      expect(OrderSearch).to receive(:sort_orders).and_return sort_orders=double("the sort orders")
+      expect(OrderReport.new.sort_orders).to eq sort_orders
+    end
+  end
+
   describe described_class::Column do
     describe "initialization" do
       it "takes the column key and configuration options" do

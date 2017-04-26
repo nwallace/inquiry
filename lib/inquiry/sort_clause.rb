@@ -1,14 +1,14 @@
 module Inquiry
   class SortClause
-    attr_reader :sort_key
-    def initialize(sort_key, sort_clause, options={})
-      @sort_key = sort_key
+    attr_reader :key
+    def initialize(key, sort_clause, options={})
+      @key = key
       @sort_clause = sort_clause
       @options = options
     end
 
     def apply(scope, search_parameters)
-      if search_parameters[:sort_order] == sort_key ||
+      if search_parameters[:sort_order] == key ||
           (!search_parameters.has_key?(:sort_order) && options[:default])
         if relation_to_join=options[:joins]
           scope = scope.joins(relation_to_join)

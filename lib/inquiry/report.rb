@@ -128,6 +128,10 @@ module Inquiry
       all_columns.values.select(&:default?)
     end
 
+    def sort_orders
+      search_class.sort_orders
+    end
+
     private
 
     def default_sort_order

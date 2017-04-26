@@ -7,8 +7,8 @@ module Inquiry
         search_clauses << SearchClause.new(search_key, filter_clause, options)
       end
 
-      def sort_order(sort_key, sort_clause, options={})
-        sort_orders << SortClause.new(sort_key, sort_clause, options)
+      def sort_order(key, sort_clause, options={})
+        sort_orders << SortClause.new(key, sort_clause, options)
       end
 
       def model_class(model_class)
@@ -21,7 +21,7 @@ module Inquiry
 
       def search(search_parameters={})
         sort_order = search_parameters[:sort_order]
-        if sort_order && sort_orders.none? {|o| o.sort_key == sort_order.to_sym}
+        if sort_order && sort_orders.none? {|o| o.key == sort_order.to_sym}
           raise InvalidSortOrderError, "This sort order is not defined on #{self.name}: #{sort_order.inspect}"
         elsif sort_order
           search_parameters[:sort_order] = sort_order.to_sym
