@@ -1,10 +1,11 @@
 module Inquiry
   module InterpolationStrategies
     {
-      "Exact" => ->(value) { value },
+      "Exact"   => ->(value) { value },
       "Partial" => ->(value) { "%#{value}%" },
-      "Prefix" => ->(value) { "#{value}%" },
-      "Suffix" => ->(value) { "%#{value}" },
+      "Prefix"  => ->(value) { "#{value}%" },
+      "Suffix"  => ->(value) { "%#{value}" },
+      "Truth"   => ->(value) { value && value != "0" && value !~ /\A(false|no)\Z/i },
     }.each do |type, interpolation_strategy|
       klass = Class.new do
         define_singleton_method(:match_value, &interpolation_strategy)

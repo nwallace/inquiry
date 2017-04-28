@@ -132,14 +132,14 @@ module Inquiry
       search_class.sort_orders
     end
 
+    def all_columns
+      self.class.send(:columns)
+    end
+
     private
 
     def default_sort_order
       self.class.instance_variable_get("@default_sort_order")
-    end
-
-    def all_columns
-      self.class.send(:columns)
     end
 
     def search_class
