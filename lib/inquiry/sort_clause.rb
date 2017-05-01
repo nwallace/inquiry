@@ -1,10 +1,14 @@
 module Inquiry
   class SortClause
     attr_reader :key
-    def initialize(key, sort_clause, options={})
+    def initialize(key, sort_clause=nil, options={})
       @key = key
-      @sort_clause = sort_clause
-      @options = options
+      if sort_clause.is_a?(Hash) && options.empty?
+        @options = sort_clause
+      else
+        @options = options
+        @sort_clause = sort_clause
+      end
     end
 
     def apply(scope, search_parameters)
@@ -16,7 +20,7 @@ module Inquiry
         if group_clause=options[:group]
           scope = scope.group(group_clause)
         end
-        scope.order(sort_clause)
+        scope.order(sort_clause || key)
       else
         scope
       end

@@ -3,9 +3,11 @@ require "spec_helper"
 RSpec.describe Inquiry::SortClause do
 
   describe "initialization" do
-    it "takes the sort key, sort clause, and optional options" do
+    it "takes the sort key, an optional sort clause, and optional options" do
       expect(described_class.new(:customer_name, "customers.last_name, customers.first_name")).to be_a described_class
       expect(described_class.new(:id, "orders.id", default: true)).to be_a described_class
+      expect(described_class.new(:id)).to be_a described_class
+      expect(described_class.new(:id, default: true)).to be_a described_class
     end
   end
 
@@ -15,6 +17,23 @@ RSpec.describe Inquiry::SortClause do
     it "applies the clause to the given scope if the specified sort order matches the sort key" do
       expect(subject.apply(Order.all, sort_order: :id).to_sql)
         .to eq Order.all.order("orders.id").to_sql
+    end
+
+    it "orders the given scope using the key as the clause when no clause is specified" do
+      expect(described_class.new(:id).apply(Order.all, sort_order: :id).to_sql)
+        .to eq Order.all.order('"orders"."id" ASC').to_sql
+      expect(described_class.new(:id, default: true).apply(Order.all, {}).to_sql)
+        .to eq Order.all.order('"orders"."id" ASC').to_sql
+    end
+
+    it "orders the given scope by the given key when the clause is a symbol" do
+      expect(described_class.new(:the_id, :id).apply(Order.all, sort_order: :the_id).to_sql)
+        .to eq Order.all.order('"orders"."id" ASC').to_sql
+    end
+
+    it "orders the given scope by the given keys when the clause is a list" do
+      expect(described_class.new(:customer, [:customer_id, :id]).apply(Order.all, sort_order: :customer).to_sql)
+        .to eq Order.all.order('"orders"."customer_id" ASC, "orders"."id" ASC').to_sql
     end
 
     it "returns the original scope if the sort order is unspecified" do

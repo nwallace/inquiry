@@ -7,7 +7,7 @@ module Inquiry
         search_clauses << SearchClause.new(search_key, filter_clause, options)
       end
 
-      def sort_order(key, sort_clause, options={})
+      def sort_order(key, sort_clause=nil, options={})
         sort_orders << SortClause.new(key, sort_clause, options)
       end
 

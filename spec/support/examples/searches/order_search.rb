@@ -8,7 +8,7 @@ class OrderSearch
   search_clause :includes_product, "line_items.product_id = ?", joins: :line_items
   search_clause :minimum_price, "1=1", joins: :line_items, group: "line_items.order_id", having: "SUM(line_items.price) >= ?"
 
-  sort_order :id, "orders.id ASC", default: true
+  sort_order :id
   sort_order :highest_price, "SUM(line_items.price) DESC", joins: :line_items, group: "line_items.order_id"
   sort_order :customer_name, "customers.last_name, customers.first_name", joins: :customer
 end
