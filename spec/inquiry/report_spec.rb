@@ -8,10 +8,10 @@ RSpec.describe Inquiry::Report do
   let(:evil_lair) { Product.create!(name: "Evil Lair") }
   let(:fabric) { Product.create!(name: "Fabric") }
   let(:thimble) { Product.create!(name: "Thimble") }
-  let!(:brent_order) { Order.create!(customer: brent, created_at: date + 1.day,
+  let!(:brent_order) { Order.create!(customer: brent, created_at: date + 1.day, status: "pending",
                              line_items: [LineItem.create!(product: fabric, price: 15),
                                           LineItem.create!(product: thimble, price: 3)]) }
-  let!(:fanny_order) { Order.create!(customer: fanny, created_at: date - 1.day,
+  let!(:fanny_order) { Order.create!(customer: fanny, created_at: date - 1.day, status: "complete",
                              line_items: [LineItem.create!(product: ray_gun, price: 100),
                                           LineItem.create!(product: evil_lair, price: 2000)]) }
 
@@ -174,6 +174,29 @@ RSpec.describe Inquiry::Report do
     it "delegates to the search class" do
       expect(OrderSearch).to receive(:sort_orders).and_return sort_orders=double("the sort orders")
       expect(OrderReport.new.sort_orders).to eq sort_orders
+    end
+  end
+
+  describe "#rollups" do
+    subject { OrderReport.new }
+
+    it "returns all the configured rollups" do
+      rollups = subject.rollups
+      expect(rollups.count).to eq 6
+      expect(rollups.map(&:class)).to eq [
+        Inquiry::Rollups::Count, Inquiry::Rollups::Sum, Inquiry::Rollups::Count,
+        Inquiry::Rollups::Counts, Inquiry::Rollups::CountPercentage, Inquiry::Rollups::Custom,
+      ]
+      expect(rollups.map(&:title)).to eq [
+        "Total orders", "Total revenue", "Total line items",
+        "Statuses", "Conversion rate", "Revenue by product",
+      ]
+      expect(rollups.map(&:result)).to eq [
+        2, 2118, 4,
+        { "pending" => 1, "complete" => 1 },
+        0.5,
+        { "Fabric" => 15, "Thimble" => 3, "Ray Gun" => 100, "Evil Lair" => 2000 },
+      ]
     end
   end
 

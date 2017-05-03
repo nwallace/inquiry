@@ -57,10 +57,27 @@ module Inquiry
         @search_class.search_clauses.map(&:search_key) << :sort_order
       end
 
+      def rollup(key, type_or_roller_upper, *args)
+        roller_upper =
+          case type_or_roller_upper
+          when :count; Rollups::Count.new(key, *args)
+          when :counts; Rollups::Counts.new(key, *args)
+          when :sum;   Rollups::Sum.new(key, *args)
+          when :count_percentage; Rollups::CountPercentage.new(key, *args)
+          when Proc; Rollups::Custom.new(key, type_or_roller_upper, *args)
+          else; raise ArgumentError, "Invalid rollup type: #{type_or_roller_upper.inspect}. Must be one of [:count, :sum, :groups_count, :groups_count_percentage] or a proc"
+          end
+        rollups << roller_upper
+      end
+
       protected
 
       def columns
         @columns ||= {}
+      end
+
+      def rollups
+        @rollups ||= []
       end
     end
 
@@ -104,14 +121,16 @@ module Inquiry
     end
 
     def results
-      @results ||= (
-        base_scope = search_class.search(criteria)
+      @results ||=
         if @pagination_options
-          base_scope.paginate(@pagination_options)
+          base_query_scope.paginate(@pagination_options)
         else
-          base_scope
+          base_query_scope
         end
-      )
+    end
+
+    def base_query_scope
+      @base_query_scope ||= search_class.search(criteria)
     end
 
     def default_criteria
@@ -134,6 +153,15 @@ module Inquiry
 
     def all_columns
       self.class.send(:columns)
+    end
+
+    def rollups
+      @rollups ||=
+        all_rollups.each { |rollup| rollup.query_scope = base_query_scope }
+    end
+
+    def all_rollups
+      self.class.send(:rollups)
     end
 
     private
