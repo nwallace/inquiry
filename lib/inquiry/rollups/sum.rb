@@ -14,6 +14,12 @@ module Inquiry
           sum
         end
       end
+
+      protected
+
+      def default_type
+        "value"
+      end
     end
   end
 end

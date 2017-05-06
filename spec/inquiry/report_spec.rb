@@ -178,24 +178,29 @@ RSpec.describe Inquiry::Report do
   end
 
   describe "#rollups" do
-    subject { OrderReport.new }
+    subject { OrderReport.new(status: ["paid", "complete", "pending"]) }
 
     it "returns all the configured rollups" do
+      Order.create!(customer: brent, created_at: date + 1.day, status: "pending",
+                    line_items: [LineItem.create!(product: fabric, price: 10)])
+      Order.create!(customer: brent, created_at: date + 1.day, status: "pending",
+                    line_items: [LineItem.create!(product: fabric, price: 10)])
       rollups = subject.rollups
       expect(rollups.count).to eq 6
       expect(rollups.map(&:class)).to eq [
         Inquiry::Rollups::Count, Inquiry::Rollups::Sum, Inquiry::Rollups::Count,
         Inquiry::Rollups::Counts, Inquiry::Rollups::CountPercentage, Inquiry::Rollups::Custom,
       ]
+      expect(rollups[4].result).to eq 0.25
       expect(rollups.map(&:title)).to eq [
         "Total orders", "Total revenue", "Total line items",
         "Statuses", "Conversion rate", "Revenue by product",
       ]
       expect(rollups.map(&:result)).to eq [
-        2, 2118, 4,
-        { "pending" => 1, "complete" => 1 },
-        0.5,
-        { "Fabric" => 15, "Thimble" => 3, "Ray Gun" => 100, "Evil Lair" => 2000 },
+        4, 2138, 6,
+        { "pending" => 3, "complete" => 1 },
+        0.25,
+        { "Fabric" => 35, "Thimble" => 3, "Ray Gun" => 100, "Evil Lair" => 2000 },
       ]
     end
   end

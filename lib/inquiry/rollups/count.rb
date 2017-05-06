@@ -22,6 +22,12 @@ module Inquiry
           count
         end
       end
+
+      protected
+
+      def default_type
+        "value"
+      end
     end
   end
 end

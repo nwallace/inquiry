@@ -7,7 +7,13 @@ module Inquiry
       end
 
       def result
-        query_scope.uniq.unscope(:group).group(@field_or_clause).count
+        query_scope.uniq.unscope(:group, :order).group(@field_or_clause).count
+      end
+
+      protected
+
+      def default_type
+        "list"
       end
     end
   end
