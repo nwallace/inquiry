@@ -85,7 +85,7 @@ module Inquiry
       base.extend ClassMethods
     end
 
-    attr_reader :criteria, :columns
+    attr_reader :criteria, :columns, :rollups
 
     def initialize(criteria={})
       if !criteria.nil?
@@ -107,6 +107,11 @@ module Inquiry
                    else
                      default_columns
                    end
+        @rollups = if selected_rollups=criteria[:rollups]
+                     all_rollups.select {|r| selected_rollups.map(&:to_sym).include?(r.key)}
+                   else
+                     all_rollups
+                   end.each {|r| r.query_scope = base_query_scope}
       end
     end
 
@@ -153,11 +158,6 @@ module Inquiry
 
     def all_columns
       self.class.send(:columns)
-    end
-
-    def rollups
-      @rollups ||=
-        all_rollups.each { |rollup| rollup.query_scope = base_query_scope }
     end
 
     def all_rollups

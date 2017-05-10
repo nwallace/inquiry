@@ -178,20 +178,21 @@ RSpec.describe Inquiry::Report do
   end
 
   describe "#rollups" do
-    subject { OrderReport.new(status: ["paid", "complete", "pending"]) }
+    before {
+      Order.create!(customer: brent, created_at: date + 1.day, status: "pending",
+                    line_items: [LineItem.create!(product: fabric, price: 10)])
+      Order.create!(customer: brent, created_at: date + 1.day, status: "pending",
+                    line_items: [LineItem.create!(product: fabric, price: 10)])
+    }
 
-    it "returns all the configured rollups" do
-      Order.create!(customer: brent, created_at: date + 1.day, status: "pending",
-                    line_items: [LineItem.create!(product: fabric, price: 10)])
-      Order.create!(customer: brent, created_at: date + 1.day, status: "pending",
-                    line_items: [LineItem.create!(product: fabric, price: 10)])
+    it "returns all the configured rollups when not specified" do
+      subject = OrderReport.new(status: ["paid", "complete", "pending"])
       rollups = subject.rollups
       expect(rollups.count).to eq 6
       expect(rollups.map(&:class)).to eq [
         Inquiry::Rollups::Count, Inquiry::Rollups::Sum, Inquiry::Rollups::Count,
         Inquiry::Rollups::Counts, Inquiry::Rollups::CountPercentage, Inquiry::Rollups::Custom,
       ]
-      expect(rollups[4].result).to eq 0.25
       expect(rollups.map(&:title)).to eq [
         "Total orders", "Total revenue", "Total line items",
         "Statuses", "Conversion rate", "Revenue by product",
@@ -202,6 +203,15 @@ RSpec.describe Inquiry::Report do
         0.25,
         { "Fabric" => 35, "Thimble" => 3, "Ray Gun" => 100, "Evil Lair" => 2000 },
       ]
+    end
+
+    it "returns the specified rollups when specified" do
+      subject = OrderReport.new(rollups: [:statuses, :total_revenue])
+      rollups = subject.rollups
+      expect(rollups.count).to eq 2
+      expect(rollups.map(&:class)).to eq [Inquiry::Rollups::Sum, Inquiry::Rollups::Counts]
+      expect(rollups.map(&:title)).to eq ["Total revenue", "Statuses"]
+      expect(rollups.map(&:result)).to eq [2138, {"pending" => 3, "complete" => 1}]
     end
   end
 
