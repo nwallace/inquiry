@@ -54,6 +54,17 @@ RSpec.describe Inquiry::Report do
     end
   end
 
+  describe "#title" do
+    after { OrderReport.title(nil) }
+    it "returns the humanized version of the report class name when none is configured" do
+      expect(OrderReport.new.title).to eq "Order report"
+    end
+
+    it "returns the configured title when one is configured" do
+      expect(OrderReport.new.title).to eq "My Custom Title"
+    end
+  end
+
   describe "#columns" do
     it "returns the default columns when unspecified" do
       expect(OrderReport.new.columns.map(&:key)).to eq [

@@ -45,6 +45,10 @@ module Inquiry
         @search_class = klass
       end
 
+      def title(title)
+        @title = title
+      end
+
       def column(key, options={})
         columns[key] = Column.new(key, options)
       end
@@ -162,6 +166,10 @@ module Inquiry
 
     def all_rollups
       self.class.send(:rollups)
+    end
+
+    def title
+      self.class.instance_variable_get("@title") || self.class.name.underscore.humanize
     end
 
     private
