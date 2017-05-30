@@ -74,6 +74,10 @@ module Inquiry
         rollups << roller_upper
       end
 
+      def named_report(name, criteria_proc)
+        named_reports << [name, criteria_proc]
+      end
+
       protected
 
       def columns
@@ -82,6 +86,10 @@ module Inquiry
 
       def rollups
         @rollups ||= []
+      end
+
+      def named_reports
+        @named_reports ||= []
       end
     end
 
@@ -170,6 +178,12 @@ module Inquiry
 
     def title
       self.class.instance_variable_get("@title") || self.class.name.underscore.humanize
+    end
+
+    def named_reports
+      @named_reports ||= self.class.send(:named_reports).each_with_object({}) do |(name, criteria_proc), result|
+        result[name] = criteria_proc.call(default_criteria.reject {|k,v| v.nil?})
+      end
     end
 
     private
