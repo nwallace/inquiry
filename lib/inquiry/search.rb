@@ -15,8 +15,18 @@ module Inquiry
         @model_class = model_class
       end
 
+      def default_scope(&block)
+        raise ArgumentError unless block
+        @default_scope = block
+      end
+
       def base_scope
-        (@model_class || self.name.to_s.sub(/Search$/, "").constantize).all
+        all_scope = (@model_class || self.name.to_s.sub(/Search$/, "").constantize).all
+        if @default_scope
+          all_scope.instance_exec(&@default_scope)
+        else
+          all_scope
+        end
       end
 
       def search(search_parameters={})

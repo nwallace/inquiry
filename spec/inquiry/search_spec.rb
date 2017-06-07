@@ -53,5 +53,15 @@ RSpec.describe Inquiry::Search do
       expect(ProductSearch.search(discontinued: false)).to match_array [ray_gun, fabric, thimble]
       expect(ProductSearch.search(discontinued: nil)).to match_array [evil_lair, ray_gun, fabric, thimble]
     end
+
+    it "incorporates the default scope when one is given" do
+      paid_orders_only_search_class = Class.new(OrderSearch) do
+        model_class Order
+        default_scope { where(status: "complete") }
+      end
+      brent_order.update!(status: "complete")
+      fanny_order.update!(status: "pending")
+      expect(paid_orders_only_search_class.search).to match_array [brent_order]
+    end
   end
 end
