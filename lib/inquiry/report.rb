@@ -61,12 +61,16 @@ module Inquiry
         @search_class.search_clauses.map(&:search_key) << :sort_order
       end
 
+      def default_columns
+        columns.values.select(&:default?)
+      end
+
       def rollup(key, type_or_roller_upper, *args)
         roller_upper =
           case type_or_roller_upper
-          when :count; Rollups::Count.new(key, *args)
+          when :count;  Rollups::Count.new(key, *args)
           when :counts; Rollups::Counts.new(key, *args)
-          when :sum;   Rollups::Sum.new(key, *args)
+          when :sum;    Rollups::Sum.new(key, *args)
           when :count_percentage; Rollups::CountPercentage.new(key, *args)
           when Proc; Rollups::Custom.new(key, type_or_roller_upper, *args)
           else; raise ArgumentError, "Invalid rollup type: #{type_or_roller_upper.inspect}. Must be one of [:count, :sum, :groups_count, :groups_count_percentage] or a proc"
@@ -161,7 +165,7 @@ module Inquiry
     end
 
     def default_columns
-      all_columns.values.select(&:default?)
+      self.class.default_columns
     end
 
     def sort_orders
