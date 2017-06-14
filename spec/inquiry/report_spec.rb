@@ -61,6 +61,7 @@ RSpec.describe Inquiry::Report do
     end
 
     it "returns the configured title when one is configured" do
+      OrderReport.title("My Custom Title")
       expect(OrderReport.new.title).to eq "My Custom Title"
     end
   end
@@ -183,8 +184,9 @@ RSpec.describe Inquiry::Report do
 
   describe "#sort_orders" do
     it "delegates to the search class" do
-      expect(OrderSearch).to receive(:sort_orders).and_return sort_orders=double("the sort orders")
-      expect(OrderReport.new.sort_orders).to eq sort_orders
+      sort_orders = [Inquiry::SortClause.new(:order_a), Inquiry::SortClause.new(:order_b)]
+      expect(OrderSearch).to receive(:sort_orders).and_return sort_orders
+      expect(OrderReport.new(nil).sort_orders).to eq sort_orders
     end
   end
 
