@@ -2,6 +2,10 @@ module Inquiry
   module Formatters
     class LinkTo
       def initialize(relation=nil, options={}, &args_block)
+        if relation.is_a?(Hash)
+          options = relation.merge(options)
+          relation = nil
+        end
         @relation = relation
         @args_block = args_block
         @label = options[:label] if options[:label]
