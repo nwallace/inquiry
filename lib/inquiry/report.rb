@@ -53,8 +53,12 @@ module Inquiry
         columns[key] = Column.new(key, options)
       end
 
-      def default_sort_order(sort_order)
-        @default_sort_order = sort_order
+      def default_criteria(criteria)
+        @default_criteria = criteria
+      end
+
+      def get_default_criteria
+        @default_criteria ||= {}
       end
 
       def permitted_criteria
@@ -111,7 +115,7 @@ module Inquiry
                                   per_page: criteria.delete(:per_page),
                                 }
                               end
-        safe_criteria = criteria.select {|k,v| default_criteria.has_key?(k)}
+        safe_criteria = criteria.slice(*self.class.permitted_criteria)
         @criteria = default_criteria.merge(safe_criteria)
         @columns = if selected_column_keys=criteria[:columns]
                      selected_column_keys.map!(&:to_sym)
@@ -155,13 +159,7 @@ module Inquiry
     end
 
     def default_criteria
-      @default_criteria ||= (
-        search_class.search_clauses.map(&:search_key).zip([]).to_h.tap do |h|
-          if default_sort_order
-            h[:sort_order] = default_sort_order
-          end
-        end
-      )
+      self.class.get_default_criteria
     end
 
     def default_columns

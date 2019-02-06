@@ -1,8 +1,7 @@
 class OrderReport
   include Inquiry::Report
 
-  # default_search_parameters status: ["paid", "complete"]
-  default_sort_order :highest_price
+  default_criteria sort_order: :highest_price
 
   search_class OrderSearch
 

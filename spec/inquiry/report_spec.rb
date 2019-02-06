@@ -18,15 +18,7 @@ RSpec.describe Inquiry::Report do
   describe "initialization, #criteria" do
     it "doesn't need any input" do
       subject = OrderReport.new
-      expect(subject.criteria).to eq(
-        created_after: nil,
-        status: nil,
-        customer_name: nil,
-        last_name_starts_with: nil,
-        includes_product: nil,
-        minimum_price: nil,
-        sort_order: :highest_price,
-      )
+      expect(subject.criteria).to eq(sort_order: :highest_price)
     end
 
     it "takes the search criteria" do
@@ -37,12 +29,8 @@ RSpec.describe Inquiry::Report do
         sort_order: :id,
       )
       expect(subject.criteria).to eq(
-        created_after: nil,
         status: ["paid"],
-        customer_name: nil,
         last_name_starts_with: "W",
-        includes_product: nil,
-        minimum_price: nil,
         sort_order: :id,
       )
     end
@@ -160,15 +148,7 @@ RSpec.describe Inquiry::Report do
 
   describe "#default_criteria" do
     it "returns the default search criteria of the search class" do
-      expected_criteria = {
-       created_after: nil,
-       customer_name: nil,
-       includes_product: nil,
-       last_name_starts_with: nil,
-       minimum_price: nil,
-       sort_order: :highest_price,
-       status: nil,
-      }
+      expected_criteria = { sort_order: :highest_price }
       expect(OrderReport.new.default_criteria).to eq(expected_criteria)
       expect(OrderReport.new(created_after: 2.days.ago, sort_order: :id).default_criteria).to eq(expected_criteria)
     end
