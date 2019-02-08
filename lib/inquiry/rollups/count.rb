@@ -12,9 +12,9 @@ module Inquiry
 
       def result
         count = if @field_or_clause
-                  query_scope.uniq.count(@field_or_clause)
+                  query_scope.distinct.count(@field_or_clause)
                 else
-                  query_scope.uniq.count
+                  query_scope.distinct.count
                 end
         if count.is_a?(Hash)
           count.values.sum
