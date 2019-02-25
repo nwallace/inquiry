@@ -6,7 +6,7 @@ class OrderSearch
   search_clause :customer_name, "customers.first_name LIKE ? OR customers.last_name LIKE ?", joins: :customer, type: :partial
   search_clause :last_name_starts_with, "customers.last_name LIKE ?", joins: :customer, type: :prefix
   search_clause :includes_product, "line_items.product_id = ?", joins: :line_items
-  search_clause :minimum_price, "1=1", joins: :line_items, group: "line_items.order_id", having: "SUM(line_items.price) >= ?"
+  search_clause :minimum_price, "1=1", left_joins: :line_items, group: "line_items.order_id", having: "SUM(COALESCE(line_items.price, 0)) >= ?"
 
   sort_order :id
   sort_order :highest_price, "SUM(line_items.price) DESC", joins: :line_items, group: "line_items.order_id"

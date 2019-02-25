@@ -19,9 +19,9 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.required_ruby_version = ">= 1.9.3"
+  spec.required_ruby_version = ">= 2.2.2"
 
-  spec.add_dependency "activerecord", ">= 3.2.0"
+  spec.add_dependency "activerecord", ">= 5.0.0"
   spec.add_dependency "will_paginate", ">= 3.0.0"
 
   spec.add_development_dependency "bundler", "~> 1.11"
@@ -29,6 +29,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rspec", "~> 3.4"
   spec.add_development_dependency "pry", "~> 0.10"
   spec.add_development_dependency "sqlite3", "~> 1.3.11"
-  spec.add_development_dependency "standalone_migrations", "~> 4.0.3"
+  spec.add_development_dependency "standalone_migrations", "~> 5.0.0"
   spec.add_development_dependency "database_cleaner", "~> 1.5.1"
 end

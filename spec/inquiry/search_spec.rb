@@ -63,5 +63,10 @@ RSpec.describe Inquiry::Search do
       fanny_order.update!(status: "pending")
       expect(paid_orders_only_search_class.search).to match_array [brent_order]
     end
+
+    it "includes records that don't have an associated record to join against when using a left join" do
+      empty_order = Order.create!(created_at: date + 1.day, line_items: [], customer: brent)
+      expect(OrderSearch.search(minimum_price: 0)).to match_array([brent_order, fanny_order, empty_order])
+    end
   end
 end
