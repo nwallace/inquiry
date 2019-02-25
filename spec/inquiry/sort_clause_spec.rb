@@ -9,6 +9,18 @@ RSpec.describe Inquiry::SortClause do
       expect(described_class.new(:id)).to be_a described_class
       expect(described_class.new(:id, default: true)).to be_a described_class
     end
+
+    it "raises an error when given unsupported options" do
+      expect {
+        described_class.new(:id, right_joins: :customer)
+      }.to raise_error ArgumentError
+    end
+
+    it "raises an error when given both a join and a left join" do
+      expect {
+        described_class.new(:id, joins: :customer, left_joins: :organization)
+      }.to raise_error ArgumentError
+    end
   end
 
   describe "#apply" do
@@ -51,6 +63,12 @@ RSpec.describe Inquiry::SortClause do
       subject = described_class.new(:customer, "customers.last_name", joins: :customer)
       expect(subject.apply(Order.all, sort_order: :customer).to_sql)
         .to eq Order.joins(:customer).order("customers.last_name").to_sql
+    end
+
+    it "left joins other relations when configured to do so" do
+      subject = described_class.new(:customer, "customers.last_name", left_joins: :customer)
+      expect(subject.apply(Order.all, sort_order: :customer).to_sql)
+        .to eq Order.left_joins(:customer).order("customers.last_name").to_sql
     end
 
     it "groups by columns when configured to do so" do
