@@ -67,5 +67,12 @@ RSpec.describe Inquiry::Formatters::LinkTo do
       end
       expect(subject.call(view, order)).to eq "Custom link"
     end
+
+    it "doesn't render anything if the record is not present" do
+      order = Order.create!
+      expect(view).not_to receive(:link_to)
+      result = subject.call(view, order)
+      expect(result).to be_nil
+    end
   end
 end

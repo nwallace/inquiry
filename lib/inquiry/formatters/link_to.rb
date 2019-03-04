@@ -14,6 +14,7 @@ module Inquiry
 
       def call(view, record)
         linked_record = @relation ? record.public_send(@relation) : record
+        return nil unless linked_record
         link_args = if @args_block
                       @args_block.call(view, linked_record)
                     elsif @label || @label_method
