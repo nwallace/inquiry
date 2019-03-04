@@ -8,6 +8,8 @@ module Inquiry
         sort_clause.slice(:default, :joins, :left_joins, :group).keys.each do |key|
           binding.local_variable_set(key, sort_clause.delete(key)) unless binding.local_variable_get(key)
         end
+        raise ArgumentError, "Unsupported option(s): #{sort_clause.inspect}" if sort_clause.any?
+        sort_clause = nil
       end
       @key = key
       @sort_clause = sort_clause
