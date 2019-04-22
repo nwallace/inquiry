@@ -1,7 +1,7 @@
 module Inquiry
   module Rollups
     class Base
-      attr_reader :key, :title, :type
+      attr_reader :key, :title, :type, :description
       attr_writer :query_scope
 
       def initialize(key, *args)
@@ -9,6 +9,7 @@ module Inquiry
         @key = key
         @title = @options[:title] || key.to_s.humanize.capitalize
         @type = @options[:type] || default_type
+        @description = @options[:description]
       end
 
       def result

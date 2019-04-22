@@ -3,11 +3,12 @@ module Inquiry
     InvalidColumnError = Class.new(StandardError)
 
     class Column
-      attr_reader :key, :title, :formatter, :includes_values
+      attr_reader :key, :title, :description, :formatter, :includes_values
       def initialize(key, options)
         @key = key
         @default = !!options[:default]
         @title = options[:title] || key.to_s.titleize
+        @description = options[:description]
         @formatter = options[:formatter] || Inquiry::Formatters::Simple.new(key)
         @includes_values = options[:includes]
       end
